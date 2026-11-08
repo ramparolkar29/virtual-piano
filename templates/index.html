@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Virtual Piano</title>
+  <meta name="description" content="A two-octave virtual piano built with Python, Flask, and the Web Audio API.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2310131a'/%3E%3Crect x='5' y='7' width='6' height='18' rx='1.5' fill='%23f4f1ea'/%3E%3Crect x='13' y='7' width='6' height='18' rx='1.5' fill='%23f4f1ea'/%3E%3Crect x='21' y='7' width='6' height='18' rx='1.5' fill='%23f4f1ea'/%3E%3Crect x='9' y='7' width='4' height='11' rx='1' fill='%2310131a'/%3E%3Crect x='17' y='7' width='4' height='11' rx='1' fill='%2310131a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <p class="eyebrow">Python + Flask + Web Audio</p>
+      <h1>Virtual Piano</h1>
+      <p class="subtitle">
+        Play with your computer keyboard, mouse, or touch. Record a take and export it
+        as a WAV rendered by the Python API.
+      </p>
+    </header>
+
+    <section class="console" aria-label="Piano controls">
+      <div class="control">
+        <label for="timbre">Timbre</label>
+        <select id="timbre">
+          <option value="piano">Piano</option>
+          <option value="sine">Sine</option>
+          <option value="organ">Organ</option>
+        </select>
+      </div>
+
+      <div class="control control-wide">
+        <label for="volume">Volume <output id="volumeValue">70%</output></label>
+        <input id="volume" type="range" min="0" max="100" value="70">
+      </div>
+
+      <div class="control">
+        <label for="song">Demo song</label>
+        <div class="inline">
+          <select id="song">
+            <option value="">Loading...</option>
+          </select>
+          <button id="playSong" class="btn btn-ghost" type="button" disabled>Play</button>
+        </div>
+      </div>
+
+      <div class="control">
+        <span class="label">Recording</span>
+        <div class="inline">
+          <button id="record" class="btn btn-record" type="button">Record</button>
+          <button id="playRecording" class="btn btn-ghost" type="button" disabled>Play</button>
+          <button id="download" class="btn btn-ghost" type="button" disabled>WAV</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="status" id="status" role="status" aria-live="polite">
+      Ready. Click a key or press Z to start.
+    </p>
+
+    <section class="piano-stage" aria-label="Piano keyboard">
+      <div class="piano">
+        <div class="white-row">
+          {% for note in notes if not note.black %}
+          <button class="key white" type="button"
+                  data-midi="{{ note.midi }}"
+                  data-key="{{ note.key }}"
+                  data-name="{{ note.name }}"
+                  aria-label="{{ note.name }}">
+            <span class="key-name">{{ note.name }}</span>
+            <span class="key-hint">{{ note.key|upper }}</span>
+          </button>
+          {% endfor %}
+
+          {% for note in notes if note.black %}
+          <button class="key black" type="button"
+                  style="--left: {{ note.left_pct }}%; --width: {{ note.width_pct }}%"
+                  data-midi="{{ note.midi }}"
+                  data-key="{{ note.key }}"
+                  data-name="{{ note.name }}"
+                  aria-label="{{ note.name }}">
+            <span class="key-name">{{ note.name }}</span>
+            <span class="key-hint">{{ note.key|upper }}</span>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="legend" aria-label="Keyboard mapping">
+      <p><strong>Lower octave</strong> Z S X D C V G B H N J M</p>
+      <p><strong>Upper octave</strong> Q 2 W 3 E R 5 T 6 Y 7 U</p>
+      <p><strong>Stop all sound</strong> Esc</p>
+    </section>
+
+    <footer class="api-bar">
+      <span class="api-label">JSON API</span>
+      <a href="/api/health">/api/health</a>
+      <a href="/api/notes">/api/notes</a>
+      <a href="/api/songs">/api/songs</a>
+      <code>POST /api/render</code>
+    </footer>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/piano.js') }}"></script>
+</body>
+</html>
